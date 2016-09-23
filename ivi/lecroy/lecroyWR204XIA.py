@@ -32,12 +32,12 @@ class lecroyWR204XIA(lecroyWRXIA):
     def __init__(self, *args, **kwargs):
         self.__dict__.setdefault('_instrument_id', 'WaveRunner 204Xi-A')
 
-        super(lecroy104XiA, self).__init__(*args, **kwargs)
+        super(lecroyWR204XIA, self).__init__(*args, **kwargs)
 
         self._analog_channel_count = 4
         self._digital_channel_count = 0
         self._channel_count = self._analog_channel_count + self._digital_channel_count
-        self._bandwidth = 1e9
+        self._bandwidth = 2e9
 
         self._init_channels()
 

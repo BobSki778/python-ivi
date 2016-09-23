@@ -30,7 +30,7 @@ class lecroyWR104XIA(lecroyWRXIA):
     "Lecroy WaveRunner 104Xi-A IVI oscilloscope driver"
 
     def __init__(self, *args, **kwargs):
-        self.__dict__.setdefault('_instrument_id', 'WR104XI-A')
+        self.__dict__.setdefault('_instrument_id', 'WaveRunner 104XI-A')
 
         super(lecroyWR104XIA, self).__init__(*args, **kwargs)
 

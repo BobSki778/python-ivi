@@ -26,7 +26,8 @@ THE SOFTWARE.
 
 # Commands for this scope series are referenced form the following documentation:
 # http://cdn.teledynelecroy.com/files/manuals/wm-rcm-e_rev_d.pdf
-# http://cdn.teledynelecroy.com/files/manuals/automation_command_ref_manual_wr.pdf
+# http://cdn.teledynelecroy.com/files/manuals/automation_command_ref_manual_ws.pdf
+# http://cdn.teledynelecroy.com/files/manuals/automation_command_ref_manual_wr.pdf (used for lecroyWRXIA class upon which this code is based)
 
 from .lecroyBaseScope import *
 
@@ -41,17 +42,18 @@ ScreenshotImageFormatMapping = {
     'png24': 'png',
     'psd': 'psd',
     'tiff': 'tiff'}
-TriggerTypes = set(['dropout', 'edge', 'glitch', 'interval', 'logic', 'qualify', 'runt', 'serial', 'slewrate', 'slate', 'tv', 'width'])
+TriggerTypes = set(['dropout', 'edge', 'glitch', 'interval', 'logic', 'qualified', 'runt', 'serial', 'slewrate', 'tv', 'width']) #eliminated 'slate' - what is that?
 ExtTriggerSetting = set(["Ext", "ExtDivide10", "Line"])
 VerticalCoupling = set(['ac', 'dc', 'gnd'])
+BandwidthLimit = set(['Full', '20MHz', '200MHZ'])
 
-class lecroyWRXIA(lecroyBaseScope):
-    """LeCroy WaveRunner Xi-A / MXi-A series IVI oscilloscope driver"""
+class lecroyHDO(lecroyBaseScope):
+    """LeCroy HDO series IVI oscilloscope driver"""
 
     def __init__(self, *args, **kwargs):
         self.__dict__.setdefault('_instrument_id', '')
 
-        super(lecroyWRXIA, self).__init__(*args, **kwargs)
+        super(lecroyHDO, self).__init__(*args, **kwargs)
 
         self._channel_interpolation = list()
         self._analog_channel_name = list()
@@ -65,9 +67,9 @@ class lecroyWRXIA(lecroyBaseScope):
 
         self._memory_size = 5
 
-        self._identity_description = "LeCroy WaveRunner Xi-A / MXi-A series IVI oscilloscope driver"
-        self._identity_supported_instrument_models = ['WR204MXI-A', 'WR204XI-A', 'WR104MXI-A', 'WR104XI-A', 'WR64MXI-A',
-                                                      'WR64XI-A', 'WR62XI-A', 'WR44MXI-A', 'WR44XI-A']
+        self._identity_description = "LeCroy HDO series IVI oscilloscope driver"
+        self._identity_supported_instrument_models = ['HDO4022',   'HDO4024',   'HDO4032',   'HDO4034',   'HDO4054',   'HDO4104',
+                                                      'HDO4022-MS','HDO4024-MS','HDO4032-MS','HDO4034-MS','HDO4054-MS','HDO4104-MS']
 
         ivi.add_property(self, 'channels[].noise_filter',
                          self._get_channel_noise_filter,
@@ -99,70 +101,17 @@ class lecroyWRXIA(lecroyBaseScope):
 
         self._init_channels()
 
-
-    # def _init_channels(self):
-    #     try:
-    #         super(lecroyBaseScope, self)._init_channels()
-    #     except AttributeError:
-    #         pass
-    #
-    #     self._channel_name = list()
-    #     self._channel_label = list()
-    #     self._channel_label_position = list()
-    #     self._channel_noise_filter = list()
-    #     self._channel_interpolation = list()
-    #     self._channel_probe_skew = list()
-    #     self._channel_invert = list()
-    #     self._channel_probe_id = list()
-    #     self._channel_bw_limit = list()
-    #     self._channel_input_impedance = list()
-    #
-    #     self._analog_channel_name = list()
-    #     for i in range(self._analog_channel_count):
-    #         self._channel_name.append("C%d" % (i + 1))
-    #         self._channel_label.append("%d" % (i + 1))
-    #         self._channel_label_position.append(0)
-    #         self._channel_noise_filter.append('None')
-    #         self._channel_interpolation.append("Linear")
-    #         self._analog_channel_name.append("C%d" % (i + 1))
-    #         self._channel_probe_skew.append(0)
-    #         self._channel_invert.append(False)
-    #         self._channel_probe_id.append("NONE")
-    #         self._channel_bw_limit.append(False)
-    #         self._channel_coupling.append("NONE")
-    #         self._channel_input_impedance.append(0)
-    #
-    #     # digital channels
-    #     self._digital_channel_name = list()
-    #     if (self._digital_channel_count > 0):
-    #         for i in range(self._digital_channel_count):
-    #             self._channel_name.append("digital%d" % i)
-    #             self._channel_label.append("D%d" % i)
-    #             self._digital_channel_name.append("digital%d" % i)
-    #
-    #         for i in range(self._analog_channel_count, self._channel_count):
-    #             self._channel_input_frequency_max[i] = 1e9
-    #             self._channel_probe_attenuation[i] = 1
-    #             #self._channel_coupling[i] = 'dc'
-    #             #self._channel_input_impedance[i] = 1000000.0
-    #             self._channel_offset[i] = 0
-    #             self._channel_range[i] = 1
-    #
-    #     self._channel_count = self._analog_channel_count + self._digital_channel_count
-    #     self.channels._set_list(self._channel_name)
-
-    # Modified for LeCroy, WORKING ON WR104XI-A
+    # Modified for LeCroy, WORKING ON HDO4034
     def _get_channel_label(self, index):
         """
         Get the label for the specified channel.
         """
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_label[index] = self._ask("VBS? \"Return=app.Acquisition.%s.LabelsText\"" % (self._channel_name[index]))
-        self._set_cache_valid(index=index)
+        if not self._driver_operation_simulate:
+            self._channel_label[index] = self._ask("VBS? 'Return=app.Acquisition.{0}.LabelsText'".format(self._channel_name[index]))
         return self._channel_label[index]
 
-    # Modified for LeCroy, WORKING ON WR104XI-A
+    # Modified for LeCroy, WORKING ON HDO4034
     def _set_channel_label(self, index, value):
         """
         Set the label for the specified channel.
@@ -170,24 +119,24 @@ class lecroyWRXIA(lecroyBaseScope):
         value = str(value)
         index = ivi.get_index(self._channel_name, index)
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.LabelsText = \"\"%s\"" % (self._channel_name[index], value))
+            self._write("VBS 'app.Acquisition.{0}.LabelsText = \"{1}\"'".format(self._channel_name[index], value))
             if self._display_labels == True:
-                self._write("VBS \"app.Acquisition.%s.ViewLabels = True\"" % self._channel_name[index])
+                self._write("VBS 'app.Acquisition.{0}.ViewLabels = True'".format(self._channel_name[index]))
         self._channel_label[index] = value
-        self._set_cache_valid(index=index)
 
-    # Added for LeCroy, WORKING ON WR104XI-A
+    # Added for LeCroy, WORKING ON HDO4034
     def _get_channel_label_position(self, index):
         """
-        Get the position of the label in seconds.
+        Get the position of the label in seconds and Volts (or Amps or 
+        whatever the vertical unit of the channel is).
         """
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_label_position[index] = float(self._ask("VBS? \"Return=app.Acquisition.%s.LabelsPosition\"" % (self._channel_name[index])))
-        self._set_cache_valid(index=index)
+        if not self._driver_operation_simulate:
+#            self._channel_label_position[index] = float(self._ask('VBS? "Return=app.Acquisition.{0}.LabelsPosition"'.format(self._channel_name[index])).split('|')[0])
+            self._channel_label_position[index] = self._ask("VBS? 'Return=app.Acquisition.{0}.LabelsPosition'".format(self._channel_name[index]))
         return self._channel_label_position[index]
 
-    # Added for LeCroy, WORKING ON WR104XI-A
+    # Added for LeCroy, WORKING ON HDO4034
     def _set_channel_label_position(self, index, value):
         """
         Set the position of the label in seconds; data should be sent as a float
@@ -198,20 +147,18 @@ class lecroyWRXIA(lecroyBaseScope):
         value = str(value)
         index = ivi.get_index(self._channel_name, index)
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.LabelsPosition = \"\"%s\"" % (self._channel_name[index], value))
+            self._write("VBS 'app.Acquisition.{0}.LabelsPosition = \"{1}\"'".format(self._channel_name[index], value))
             if self._display_labels == True:
-                self._write("VBS \"app.Acquisition.%s.ViewLabels = True\"" % self._channel_name[index])
+                self._write("VBS 'app.Acquisition.{0}.ViewLabels = True'".format(self._channel_name[index]))
         self._channel_label_position[index] = value
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_bw_limit(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            limits = (self._ask("VBS? \"Return=app.Acquisition.%s.BandwidthLimit\"" % self._channel_name[index]))
+        if not self._driver_operation_simulate:
+            limits = (self._ask("VBS? 'Return=app.Acquisition.{0}.BandwidthLimit'".format(self._channel_name[index])))
             if self._channel_name[index] in limits:
                 self._channel_bw_limit[index] = limits[limits.index(self._channel_name[index]) + 1]
-            self._set_cache_valid(index=index)
         return self._channel_bw_limit[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -224,9 +171,8 @@ class lecroyWRXIA(lecroyBaseScope):
         """
         index = ivi.get_index(self._analog_channel_name, index)
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.BandwidthLimit = \"\"%s\"" % (self._channel_name[index], value))
+            self._write("VBS 'app.Acquisition.{0}.BandwidthLimit = \"{1}\"'".format(self._channel_name[index], value))
         self._channel_bw_limit[index] = value
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_invert(self, index):
@@ -236,10 +182,9 @@ class lecroyWRXIA(lecroyBaseScope):
         * True = Inverted
         """
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_invert[index] = bool(
-                int(self._ask("VBS? \"Return=app.Acquisition.%s.Invert\"" % self._channel_name[index])))
-            self._set_cache_valid(index=index)
+                int(self._ask("VBS? 'Return=app.Acquisition.{0}.Invert'".format(self._channel_name[index]))))
         return self._channel_invert[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -252,16 +197,14 @@ class lecroyWRXIA(lecroyBaseScope):
         index = ivi.get_index(self._analog_channel_name, index)
         value = bool(value)
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.Invert = %s\"" % (self._channel_name[index], value))
+            self._write("VBS 'app.Acquisition.{0}.Invert = {1}'".format(self._channel_name[index], value))
         self._channel_invert[index] = value
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_noise_filter(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_noise_filter[index] = self._ask("VBS? \"Return=app.Acquisition.%s.EnhanceResType\"" % (self._channel_name[index]))
-            self._set_cache_valid(index=index)
+        if not self._driver_operation_simulate:
+            self._channel_noise_filter[index] = self._ask("VBS? 'Return=app.Acquisition.{0}.EnhanceResType'".format(self._channel_name[index]))
         return self._channel_noise_filter[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -282,16 +225,14 @@ class lecroyWRXIA(lecroyBaseScope):
         if filtertype not in NoiseFilter:
             raise ivi.ValueNotSupportedException()
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.EnhanceResType = \"\"%s\"" % (self._channel_name[index], filtertype))
+            self._write("VBS 'app.Acquisition.{0}.EnhanceResType = \"{1}\"'".format(self._channel_name[index], filtertype))
         self._channel_noise_filter[index] = str(filtertype)
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_interpolation(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_interpolation[index] = self._ask("VBS? \"Return=app.Acquisition.%s.InterpolateType\"" % (self._channel_name[index]))
-            self._set_cache_valid(index=index)
+        if not self._driver_operation_simulate:
+            self._channel_interpolation[index] = self._ask("VBS? 'Return=app.Acquisition.{0}.InterpolateType'".format(self._channel_name[index]))
         return self._channel_interpolation[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -301,17 +242,15 @@ class lecroyWRXIA(lecroyBaseScope):
         """
         index = ivi.get_index(self._analog_channel_name, index)
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.InterpolateType = \"\"%s\"" % (
+            self._write("VBS 'app.Acquisition.{0}.InterpolateType = \"{1}\"'".format(
                 self._channel_name[index], interpolate_setting))
         self._channel_interpolation[index] = interpolate_setting
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_probe_skew(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
-            self._channel_probe_skew[index] = float(self._ask("VBS? \"Return=app.Acquisition.%s.Deskew\"" % self._channel_name[index]))
-            self._set_cache_valid(index=index)
+        if not self._driver_operation_simulate:
+            self._channel_probe_skew[index] = float(self._ask("VBS? 'Return=app.Acquisition.{0}.Deskew'".format(self._channel_name[index])))
         return self._channel_probe_skew[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -319,16 +258,14 @@ class lecroyWRXIA(lecroyBaseScope):
         index = ivi.get_index(self._analog_channel_name, index)
         value = float(value)
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.%s.Deskew = \"\"%e\"" % (self._channel_name[index], value))
+            self._write("VBS 'app.Acquisition.{0}.Deskew = \"{1:e}\"'".format(self._channel_name[index], value))
         self._channel_probe_skew[index] = value
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_trigger_source(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
-            value = self._ask("VBS? \"Return=app.Acquisition.Trigger.Source\"")
+        if not self._driver_operation_simulate:
+            value = self._ask("VBS? 'Return=app.Acquisition.Trigger.Source'")
             self._trigger_source = value
-            self._set_cache_valid()
         return self._trigger_source
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -337,16 +274,14 @@ class lecroyWRXIA(lecroyBaseScope):
         if (value not in self._channel_name) and (value not in ExtTriggerSetting):
             raise ivi.UnknownPhysicalNameException()
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.Trigger.Source = \"\"%s\"" % str(value))
+            self._write("VBS 'app.Acquisition.Trigger.Source = \"{0!s}\"'".format(value))
         self._trigger_source = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_trigger_type(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
-            value = self._ask("VBS? \"Return=app.Acquisition.Trigger.Type\"").lower()
+        if not self._driver_operation_simulate:
+            value = self._ask("VBS? 'Return=app.Acquisition.Trigger.Type'").lower()
             self._trigger_type = value
-            self._set_cache_valid()
         return self._trigger_type
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -355,11 +290,27 @@ class lecroyWRXIA(lecroyBaseScope):
         if value not in TriggerTypes:
             raise ivi.ValueNotSupportedException()
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.Acquisition.Trigger.Type = \"\"%s\"" % value)
+            self._write("VBS 'app.Acquisition.Trigger.Type = \"{0}\"'".format(value))
         self._trigger_type = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _measurement_auto_setup(self):
         if not self._driver_operation_simulate:
-            self._write("VBS \"app.AutoSetup\"")
+            self._write("VBS 'app.AutoSetup'")
+
+"""
+    def _get_channel_scale(self, index):
+        index = ivi.get_index(self._channel_name, index)
+        if not self._driver_operation_simulate:
+            self._channel_scale[index] = float(self._ask("{}:VDIV?".format(self._channel_name[index])))
+            self._channel_range[index] = self._channel_scale[index] * self._vertical_divisions
+        return self._channel_scale[index]
+
+    def _set_channel_scale(self, index, value):
+        index = ivi.get_index(self._channel_name, index)
+        value = float(value)
+        if not self._driver_operation_simulate:
+            self._write("{}:VDIV {:e}".format((self._channel_name[index], value)))
+        self._channel_scale[index] = value
+        self._channel_range[index] = value * self._vertical_divisions
+"""

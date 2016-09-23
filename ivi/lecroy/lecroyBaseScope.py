@@ -215,8 +215,9 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         self._identity_specification_major_version = 4
         self._identity_specification_minor_version = 1
         self._identity_supported_instrument_models = ['WR204MXI-A', 'WR204XI-A', 'WR104MXI-A', 'WR104XI-A', 'WR64MXI-A',
-                                                      'WR64XI-A',
-                                                      'WR62XI-A', 'WR44MXI-A', 'WR44XI-A']
+                                                      'WR64XI-A', 'WR62XI-A', 'WR44MXI-A', 'WR44XI-A',
+                                                      'HDO4022',   'HDO4024',   'HDO4032',   'HDO4034',   'HDO4054',   'HDO4104',
+                                                      'HDO4022-MS','HDO4024-MS','HDO4032-MS','HDO4034-MS','HDO4054-MS','HDO4104-MS']
 
         # Turn off the command header to remove extra information from all responses
         self._write("CHDR OFF")
@@ -643,10 +644,9 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
 
     # TODO: determine how to handle all :timebase: methods for LeCroy
     def _get_timebase_mode(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             value = self._ask(":timebase:mode?").lower()
             self._timebase_mode = [k for k, v in TimebaseModeMapping.items() if v == value][0]
-            self._set_cache_valid
         return self._timebase_mode
 
     def _set_timebase_mode(self, value):
@@ -655,13 +655,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":timebase:mode %s" % TimebaseModeMapping[value])
         self._timebase_mode = value
-        self._set_cache_valid()
 
     def _get_timebase_reference(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             value = self._ask(":timebase:reference?").lower()
             self._timebase_reference = [k for k, v in TimebaseReferenceMapping.items() if v == value][0]
-            self._set_cache_valid
         return self._timebase_reference
 
     def _set_timebase_reference(self, value):
@@ -670,12 +668,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":timebase:reference %s" % TimebaseReferenceMapping[value])
         self._timebase_reference = value
-        self._set_cache_valid()
 
     def _get_timebase_position(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._timebase_position = float(self._ask(":timebase:position?"))
-            self._set_cache_valid()
         return self._timebase_position
 
     def _set_timebase_position(self, value):
@@ -683,15 +679,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":timebase:position %e" % value)
         self._timebase_position = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, working
     def _get_timebase_range(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._timebase_scale = float(self._ask("TDIV?"))
             self._timebase_range = self._timebase_scale * self._horizontal_divisions
-            self._set_cache_valid()
-            self._set_cache_valid(True, 'timebase_scale')
         return self._timebase_range
 
     # Modified for LeCroy, working
@@ -701,16 +694,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write("TDIV %e" % (value / self._horizontal_divisions))
         self._timebase_scale = value / self._horizontal_divisions
         self._timebase_range = value
-        self._set_cache_valid()
-        self._set_cache_valid(True, 'timebase_scale')
 
     # Modified for LeCroy, working
     def _get_timebase_scale(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._timebase_scale = float(self._ask("TDIV?"))
             self._timebase_range = self._timebase_scale * self._horizontal_divisions
-            self._set_cache_valid()
-            self._set_cache_valid(True, 'timebase_range')
         return self._timebase_scale
 
     # Modified for LeCroy, working
@@ -720,13 +709,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write("TDIV %e" % value)
         self._timebase_scale = value
         self._timebase_range = value * self._horizontal_divisions
-        self._set_cache_valid()
-        self._set_cache_valid(True, 'timebase_range')
 
     def _get_timebase_window_position(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._timebase_window_position = float(self._ask(":timebase:window:position?"))
-            self._set_cache_valid()
         return self._timebase_window_position
 
     def _set_timebase_window_position(self, value):
@@ -734,14 +720,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":timebase:window:position %e" % value)
         self._timebase_window_position = value
-        self._set_cache_valid()
 
     def _get_timebase_window_range(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._timebase_window_range = float(self._ask(":timebase:window:range?"))
             self._timebase_window_scale = self._timebase_window_range / self._horizontal_divisions
-            self._set_cache_valid()
-            self._set_cache_valid(True, 'timebase_window_scale')
         return self._timebase_window_range
 
     def _set_timebase_window_range(self, value):
@@ -750,15 +733,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write(":timebase:window:range %e" % value)
         self._timebase_window_range = value
         self._timebase_window_scale = value / self._horizontal_divisions
-        self._set_cache_valid()
-        self._set_cache_valid(True, 'timebase_window_scale')
 
     def _get_timebase_window_scale(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._timebase_window_scale = float(self._ask(":timebase:window:scale?"))
             self._timebase_window_range = self._timebase_window_scale * self._horizontal_divisions
-            self._set_cache_valid()
-            self._set_cache_valid(True, 'timebase_window_range')
         return self._timebase_window_scale
 
     def _set_timebase_window_scale(self, value):
@@ -767,13 +746,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write(":timebase:window:scale %e" % value)
         self._timebase_window_scale = value
         self._timebase_window_range = value * self._horizontal_divisions
-        self._set_cache_valid()
-        self._set_cache_valid(True, 'timebase_window_range')
 
     def _get_display_vectors(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._display_vectors = bool(int(self._ask(":display:vectors?")))
-            self._set_cache_valid()
         return self._display_vectors
 
     def _set_display_vectors(self, value):
@@ -781,13 +757,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":display:vectors %d" % int(value))
         self._display_vectors = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, working
     def _get_grid_mode(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._display_vectors = str(self._ask("GRID?"))
-            self._set_cache_valid()
         return self._display_vectors
 
     # Modified for LeCroy, working
@@ -795,12 +769,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("GRID %s" % str(value))
         self._display_vectors = str(value)
-        self._set_cache_valid()
 
     def _get_acquisition_start_time(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._acquisition_start_time = float(self._ask(":waveform:xorigin?"))
-            self._set_cache_valid()
         return self._acquisition_start_time
 
     def _set_acquisition_start_time(self, value):
@@ -809,13 +781,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":timebase:position %e" % value)
         self._acquisition_start_time = value
-        self._set_cache_valid()
 
     def _get_acquisition_type(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             value = self._ask(":acquire:type?").lower()
             self._acquisition_type = [k for k, v in AcquisitionTypeMapping.items() if v == value][0]
-            self._set_cache_valid()
         return self._acquisition_type
 
     def _set_acquisition_type(self, value):
@@ -824,7 +794,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":acquire:type %s" % AcquisitionTypeMapping[value])
         self._acquisition_type = value
-        self._set_cache_valid()
 
     def _get_acquisition_number_of_points_minimum(self):
         return self._acquisition_number_of_points_minimum
@@ -835,16 +804,14 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_acquisition_record_length(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._acquisition_record_length = float(self._ask("MSIZ?"))
-            self._set_cache_valid()
         return self._acquisition_record_length
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_acquisition_time_per_record(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._acquisition_time_per_record = float(self._ask("TDIV?")) * self._horizontal_divisions
-            self._set_cache_valid()
         return self._acquisition_time_per_record
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -853,15 +820,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("TDIV %e" % (value / self._horizontal_divisions))
         self._acquisition_time_per_record = value * self._horizontal_divisions
-        self._set_cache_valid()
-        self._set_cache_valid(False, 'acquisition_start_time')
 
     # This method implemented differently in WRXIA, not tested with other LeCroy scope
     def _get_channel_label(self, index):
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_label[index] = self._ask(":%s:label?" % self._channel_name[index]).strip('"')
-            self._set_cache_valid(index=index)
         return self._channel_label[index]
 
     # This method implemented differently in WRXIA, not tested with other LeCroy scope
@@ -871,18 +835,16 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":%s:label \"%s\"" % (self._channel_name[index], value))
         self._channel_label[index] = value
-        self._set_cache_valid(index=index)
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_enabled(self, index):
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             trace = self._ask("%s:TRA?" % self._channel_name[index])
             if trace == "ON":
                 self._channel_enabled[index] = True
             elif trace == "OFF":
                 self._channel_enabled[index] = False
-            self._set_cache_valid(index=index)
         return self._channel_enabled[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -895,12 +857,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             elif value == True:
                 self._write("%s:TRA ON" % self._channel_name[index])
         self._channel_enabled[index] = value
-        self._set_cache_valid(index=index)
 
     # TODO: test channel.input_impedance
     def _get_channel_input_impedance(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             result = str(self._ask("%s:coupling?" % self._channel_name[index])).lower().split()
             result = result[1]
             if result == 'a1m':
@@ -917,7 +878,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
                 coupling = "gnd"
             self._channel_input_impedance[index] = impedance
             self._channel_coupling[index] = coupling
-            self._set_cache_valid(index=index)
         return self._channel_input_impedance[index]
 
     # TODO: test channel.input_impedance
@@ -946,7 +906,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("%s:coupling %s" % (self._channel_name[index], coupling.upper()))
         self._channel_input_impedance[index] = value
-        self._set_cache_valid(index=index)
 
     def _get_channel_input_frequency_max(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
@@ -958,22 +917,20 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._set_channel_bw_limit(index, value < 20e6)
         self._channel_input_frequency_max[index] = value
-        self._set_cache_valid(index=index)
 
     # Tested, working on WRX104MXiA
     def _get_channel_probe_attenuation(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_probe_attenuation[index] = int(
                 (self._ask("%s:attenuation?" % self._channel_name[index])))
-            self._set_cache_valid(index=index)
         return self._channel_probe_attenuation[index]
 
     # TODO: not working yet, can not write the correct value
     def _set_channel_probe_attenuation(self, index, value):
         """
         <channel> : ATTeNuation <attenuation>
-        <channel> :={C1,C2,C3,C4,EX,EX10}
+        <channel> : = {C1,C2,C3,C4,EX,EX10}
         <attenuation> : = {1, 2, 5, 10, 20, 25, 50, 100, 200, 500, 1000, 10000}
         """
         index = ivi.get_index(self._analog_channel_name, index)
@@ -981,13 +938,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("%s:ATTN %e" % (self._channel_name[index], value))
         self._channel_probe_attenuation[index] = value
-        self._set_cache_valid(index=index)
 
     def _get_channel_invert(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_invert[index] = bool(int(self._ask(":%s:invert?" % self._channel_name[index])))
-            self._set_cache_valid(index=index)
         return self._channel_invert[index]
 
     def _set_channel_invert(self, index, value):
@@ -996,24 +951,21 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":%s:invert %e" % (self._channel_name[index], int(value)))
         self._channel_invert[index] = value
-        self._set_cache_valid(index=index)
 
     def _get_channel_probe_id(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_probe_id[index] = self._ask(":%s:probe:id?" % self._channel_name[index])
-            self._set_cache_valid(index=index)
         return self._channel_probe_id[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_bw_limit(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             # On WRXiA bandwidth limits are read out all at one time, we need to split the list to get specified channel
             limits = (self._ask("BWL?").strip()).split(',')
             if self._channel_name[index] in limits:
                 self._channel_bw_limit[index] = limits[limits.index(self._channel_name[index]) + 1]
-            self._set_cache_valid(index=index)
         return self._channel_bw_limit[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -1022,12 +974,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("BWL %s,%s" % (self._channel_name[index], value))
         self._channel_bw_limit[index] = value
-        self._set_cache_valid(index=index)
 
     # TODO: FIX COUPLING AND IMPEDANCE
     def _get_channel_coupling(self, index):
         index = ivi.get_index(self._analog_channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             result = self._ask("%s:coupling?" % self._channel_name[index]).lower().split()
             self._channel_coupling[index] = result[1]
         return self._channel_coupling[index]
@@ -1054,14 +1005,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("%s:coupling %s" % (self._channel_name[index], coupling.upper()))
         self._channel_coupling[index] = value
-        self._set_cache_valid(index=index)
 
     # TODO: test
     def _get_channel_offset(self, index):
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_offset[index] = float(self._ask("%s:offset?" % self._channel_name[index]))
-            self._set_cache_valid(index=index)
         return self._channel_offset[index]
 
     # TODO: test
@@ -1071,15 +1020,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("%s:offset %e" % (self._channel_name[index], value))
         self._channel_offset[index] = value
-        self._set_cache_valid(index=index)
 
     def _get_channel_range(self, index):
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_range[index] = float(self._ask(":%s:range?" % self._channel_name[index]))
             self._channel_scale[index] = self._channel_range[index] / self._vertical_divisions
-            self._set_cache_valid(index=index)
-            self._set_cache_valid(True, "channel_scale", index)
         return self._channel_range[index]
 
     def _set_channel_range(self, index, value):
@@ -1089,16 +1035,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write(":%s:range %e" % (self._channel_name[index], value))
         self._channel_range[index] = value
         self._channel_scale[index] = value / self._vertical_divisions
-        self._set_cache_valid(index=index)
-        self._set_cache_valid(True, "channel_scale", index)
 
     def _get_channel_scale(self, index):
         index = ivi.get_index(self._channel_name, index)
-        if not self._driver_operation_simulate and not self._get_cache_valid(index=index):
+        if not self._driver_operation_simulate:
             self._channel_scale[index] = float(self._ask(":%s:scale?" % self._channel_name[index]))
             self._channel_range[index] = self._channel_scale[index] * self._vertical_divisions
-            self._set_cache_valid(index=index)
-            self._set_cache_valid(True, "channel_range", index)
         return self._channel_scale[index]
 
     def _set_channel_scale(self, index, value):
@@ -1108,14 +1050,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write(":%s:scale %e" % (self._channel_name[index], value))
         self._channel_scale[index] = value
         self._channel_range[index] = value * self._vertical_divisions
-        self._set_cache_valid(index=index)
-        self._set_cache_valid(True, "channel_range", index)
 
     def _get_measurement_status(self):
         return self._measurement_status
 
     def _get_trigger_coupling(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             cpl = self._ask(":trigger:coupling?").lower()
             noise = int(self._ask(":trigger:nreject?"))
             hf = int(self._ask(":trigger:hfreject?"))
@@ -1133,12 +1073,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             self._write(":trigger:nreject %d" % noise)
             self._write(":trigger:hfreject %d" % hf)
         self._trigger_coupling = value
-        self._set_cache_valid()
 
     def _get_trigger_holdoff(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._trigger_holdoff = float(self._ask(":trigger:holdoff?"))
-            self._set_cache_valid()
         return self._trigger_holdoff
 
     def _set_trigger_holdoff(self, value):
@@ -1146,13 +1084,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":trigger:holdoff %e" % value)
         self._trigger_holdoff = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_channel_trigger_level(self, index):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._channel_trigger_level[index] = float(self._ask(("%s:TRLV?") % self._channel_name[index]).split(",")[0].split(" ")[0])
-            self._set_cache_valid()
         return self._channel_trigger_level[index]
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -1161,13 +1097,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("%s:TRLV %e" % (self._channel_name[index], value))
         self._channel_trigger_level[index] = value
-        self._set_cache_valid()
 
     def _get_trigger_edge_slope(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             value = self._ask(":trigger:edge:slope?").lower()
             self._trigger_edge_slope = [k for k, v in SlopeMapping.items() if v == value][0]
-            self._set_cache_valid()
         return self._trigger_edge_slope
 
     def _set_trigger_edge_slope(self, value):
@@ -1176,18 +1110,16 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":trigger:edge:slope %s" % SlopeMapping[value])
         self._trigger_edge_slope = value
-        self._set_cache_valid()
 
     # To only get the trigger source, the entire TRSE must be read out
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_trigger_source(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             vals = self._ask("TRSE?")
             vals = vals.split(",")
             #type = vals[0]
             source = vals[vals.index('SR')+1]
             self._trigger_source = source
-            self._set_cache_valid()
         return self._trigger_source
 
     # To only set the trigger source, the entire TRSE must be read out and then the new trigger source is hacked in
@@ -1203,7 +1135,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             vals = ",".join(split_vals)
             self._write("TRSE %s" % vals)
         self._trigger_source = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _set_trigger_mode(self, value):
@@ -1213,23 +1144,20 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("TRMD %s" % value.lower())
         self._trigger_mode = value
-        self._set_cache_valid()
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_trigger_mode(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             value = self._ask("TRMD?").lower()
             self._trigger_mode = value
-            self._set_cache_valid()
         return self._trigger_mode
 
     # Modified for LeCroy, WORKING ON WR104XI-A
     def _get_trigger_type(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             vals = self._ask("TRSE?")
             value = vals.split(",")[0]
             self._trigger_type = value.lower()
-            self._set_cache_valid()
         return self._trigger_type
 
     # Modified for LeCroy, WORKING ON WR104XI-A
@@ -1240,17 +1168,15 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write("TRSE %s" % value)
         self._trigger_type = value
-        self._set_cache_valid()
 
     def _measurement_abort(self):
         pass
 
     # def _get_trigger_tv_trigger_event(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = self._ask(":trigger:tv:mode?").lower()
     #         # may need processing
     #         self._trigger_tv_trigger_event = [k for k, v in TVTriggerEventMapping.items() if v == value][0]
-    #         self._set_cache_valid()
     #     return self._trigger_tv_trigger_event
     #
     # def _set_trigger_tv_trigger_event(self, value):
@@ -1260,14 +1186,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:tv:mode %s" % TVTriggerEventMapping[value])
     #     self._trigger_tv_trigger_event = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_tv_line_number(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = int(self._ask(":trigger:tv:line?"))
     #         # may need processing
     #         self._trigger_tv_line_number = value
-    #         self._set_cache_valid()
     #     return self._trigger_tv_line_number
     #
     # def _set_trigger_tv_line_number(self, value):
@@ -1276,13 +1200,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:tv:line %e" % value)
     #     self._trigger_tv_line_number = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_tv_polarity(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = self._ask(":trigger:tv:polarity?").lower()
     #         self._trigger_tv_polarity = [k for k, v in PolarityMapping.items() if v == value][0]
-    #         self._set_cache_valid()
     #     return self._trigger_tv_polarity
     #
     # def _set_trigger_tv_polarity(self, value):
@@ -1291,13 +1213,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:tv:polarity %s" % PolarityMapping[value])
     #     self._trigger_tv_polarity = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_tv_signal_format(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = self._ask(":trigger:tv:standard?").lower()
     #         self._trigger_tv_signal_format = [k for k, v in TVTriggerFormatMapping.items() if v == value][0]
-    #         self._set_cache_valid()
     #     return self._trigger_tv_signal_format
     #
     # def _set_trigger_tv_signal_format(self, value):
@@ -1306,14 +1226,12 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:tv:standard %s" % TVTriggerFormatMapping[value])
     #     self._trigger_tv_signal_format = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_glitch_condition(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = self._ask(":trigger:glitch:qualifier?").lower()
     #         if value in GlitchConditionMapping.values():
     #             self._trigger_glitch_condition = [k for k, v in GlitchConditionMapping.items() if v == value][0]
-    #             self._set_cache_valid()
     #     return self._trigger_glitch_condition
     #
     # def _set_trigger_glitch_condition(self, value):
@@ -1322,7 +1240,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:glitch:qualifier %s" % GlitchConditionMapping[value])
     #     self._trigger_glitch_condition = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_glitch_polarity(self):
     #     return self._get_trigger_width_polarity()
@@ -1343,11 +1260,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #         self._set_trigger_width_threshold_high(value)
     #
     # def _get_trigger_width_condition(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = self._ask(":trigger:glitch:qualifier?").lower()
     #         if value in WidthConditionMapping.values():
     #             self._trigger_width_condition = [k for k, v in WidthConditionMapping.items() if v == value][0]
-    #             self._set_cache_valid()
     #     return self._trigger_width_condition
     #
     # def _set_trigger_width_condition(self, value):
@@ -1356,12 +1272,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:glitch:qualifier %s" % WidthConditionMapping[value])
     #     self._trigger_width_condition = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_width_threshold_high(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         self._trigger_width_threshold_high = float(self._ask(":trigger:glitch:lessthan?"))
-    #         self._set_cache_valid()
     #     return self._trigger_width_threshold_high
     #
     # def _set_trigger_width_threshold_high(self, value):
@@ -1369,12 +1283,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:glitch:lessthan %e" % value)
     #     self._trigger_width_threshold_high = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_width_threshold_low(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         self._trigger_width_threshold_low = float(self._ask(":trigger:glitch:greaterthan?"))
-    #         self._set_cache_valid()
     #     return self._trigger_width_threshold_low
     #
     # def _set_trigger_width_threshold_low(self, value):
@@ -1382,13 +1294,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:glitch:greaterthan %e" % value)
     #     self._trigger_width_threshold_low = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_width_polarity(self):
-    #     if not self._driver_operation_simulate and not self._get_cache_valid():
+    #     if not self._driver_operation_simulate:
     #         value = self._ask(":trigger:glitch:polarity?").lower()
     #         self._trigger_width_polarity = [k for k, v in PolarityMapping.items() if v == value][0]
-    #         self._set_cache_valid()
     #     return self._trigger_width_polarity
     #
     # def _set_trigger_width_polarity(self, value):
@@ -1397,7 +1307,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
     #     if not self._driver_operation_simulate:
     #         self._write(":trigger:glitch:polarity %s" % PolarityMapping[value])
     #     self._trigger_width_polarity = value
-    #     self._set_cache_valid()
     #
     # def _get_trigger_ac_line_slope(self):
     #     return self._get_trigger_edge_slope()
@@ -1480,7 +1389,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":acquire:complete 100")
             self._write(":digitize")
-            self._set_cache_valid(False, 'trigger_continuous')
 
     def _get_reference_level_high(self):
         return self._reference_level_high
@@ -1565,9 +1473,8 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         return _measurement_fetch_waveform_min_max(index)
 
     def _get_trigger_continuous(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._trigger_continuous = (int(self._ask(":oper:cond?")) & 1 << 3) != 0
-            self._set_cache_valid()
         return self._trigger_continuous
 
     def _set_trigger_continuous(self, value):
@@ -1577,12 +1484,10 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
             if value: t = 'run'
             self._write(":%s" % t)
         self._trigger_continuous = value
-        self._set_cache_valid()
 
     def _get_acquisition_number_of_averages(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             self._acquisition_number_of_averages = int(self._ask(":acquire:count?"))
-            self._set_cache_valid()
         return self._acquisition_number_of_averages
 
     def _set_acquisition_number_of_averages(self, value):
@@ -1591,13 +1496,11 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":acquire:count %d" % value)
         self._acquisition_number_of_averages = value
-        self._set_cache_valid()
 
     def _get_acquisition_sample_mode(self):
-        if not self._driver_operation_simulate and not self._get_cache_valid():
+        if not self._driver_operation_simulate:
             value = self._ask(":acquire:mode?").lower()
             self._acquisition_sample_mode = [k for k, v in SampleModeMapping.items() if v == value][0]
-            self._set_cache_valid()
         return self._acquisition_sample_mode
 
     def _set_acquisition_sample_mode(self, value):
@@ -1606,7 +1509,6 @@ class lecroyBaseScope(scpi.common.IdnCommand, scpi.common.ErrorQuery, scpi.commo
         if not self._driver_operation_simulate:
             self._write(":acquire:mode %s" % SampleModeMapping[value])
         self._acquisition_sample_mode = value
-        self._set_cache_valid()
 
     # Not changed
     def _measurement_auto_setup(self):

@@ -35,3 +35,15 @@ from .lecroyWR64XIA import lecroyWR64XIA
 from .lecroyWR62XIA import lecroyWR62XIA
 from .lecroyWR44MXIA import lecroyWR44MXIA
 from .lecroyWR44XIA import lecroyWR44XIA
+from .lecroyHDO4022 import lecroyHDO4022
+from .lecroyHDO4022MS import lecroyHDO4022MS
+from .lecroyHDO4024 import lecroyHDO4024
+from .lecroyHDO4024MS import lecroyHDO4024MS
+from .lecroyHDO4032 import lecroyHDO4032
+from .lecroyHDO4032MS import lecroyHDO4032MS
+from .lecroyHDO4034 import lecroyHDO4034
+from .lecroyHDO4034MS import lecroyHDO4034MS
+from .lecroyHDO4054 import lecroyHDO4054
+from .lecroyHDO4054MS import lecroyHDO4054MS
+from .lecroyHDO4104 import lecroyHDO4104
+from .lecroyHDO4104MS import lecroyHDO4104MS
